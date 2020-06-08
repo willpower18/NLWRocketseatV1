@@ -5,6 +5,7 @@ import { LeafletMouseEvent } from 'leaflet';
 import axios from 'axios';
 import { FiArrowLeft } from 'react-icons/fi';
 import api from '../../services/api';
+import Dropzone from '../../components/dropzone';
 import './styles.css';
 import logo from '../../assets/logo.svg';
 
@@ -33,6 +34,7 @@ const CreatePoint = () => {
     const [selectedCity, setSelectedCity] = useState('0');
     const [selectedPosition,setSelectedPosition] = useState<[number,number]>([0,0]);
     const [initialPosition,setInitialPosition] = useState<[number,number]>([0,0]);
+    const [selectedFile, setSelectedFile] = useState<File>();
 
     const history = useHistory();
 
@@ -107,16 +109,22 @@ const CreatePoint = () => {
         const city = selectedCity;
         const [latitude, longitude] = selectedPosition;
         const items = selectedItems;
-        const data ={
-            name,
-            email,
-            whatsapp,
-            latitude,
-            longitude,
-            city,
-            uf,
-            items
-        };
+        
+        const data = new FormData();
+        data.append('name', name);
+        data.append('email', email);
+        data.append('whatsapp', whatsapp);
+        data.append('latitude', String(latitude));
+        data.append('longitude', String(longitude));
+        data.append('city', city);
+        data.append('uf', uf);
+        data.append('items', items.join(','));
+        if(selectedFile){
+            data.append('image', selectedFile);  
+        } 
+
+            
+
         await api.post('points',data);
         alert('Ponto de Coleta Criado!');
         history.push('/');
@@ -133,6 +141,7 @@ const CreatePoint = () => {
             </header>
             <form onSubmit={handleSubmit}>
                 <h1>Cadastro do<br/> ponto de coleta</h1>
+                <Dropzone onFileUpload={setSelectedFile}/>
                 <fieldset>
                     <legend>
                         <h2>Dados</h2>
